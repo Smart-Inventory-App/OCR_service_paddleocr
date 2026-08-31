@@ -1,0 +1,25 @@
+services:
+
+  paddleocr:
+    build: .
+    container_name: tpp_ocr_paddleocr
+    ports:
+      # Publicado sólo para poder probar el motor aislado.
+      - "8007:8007"
+    env_file:
+      - .env
+    networks:
+      - tpp-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8007/engine/livez"]
+      # El modelo tarda en cargar: se le da margen antes de contarlo como caído.
+      start_period: 90s
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+networks:
+  tpp-net:
+    external: true
+    name: tpp-net
