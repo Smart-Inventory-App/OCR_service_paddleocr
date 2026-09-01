@@ -64,12 +64,7 @@ Dos diferencias de forma con la salida cruda de PP-OCR, resueltas acá para que 
 - **El polígono se vuelve caja recta.** PP-OCR devuelve un cuadrilátero de cuatro vértices que puede venir inclinado; el contrato es una caja, así que se toma la envolvente.
 - **Las líneas se numeran.** PP-OCR no numera, así que se agrupan por proximidad vertical, igual que en EasyOCR.
 
-> **Sobre la granularidad.** PP-OCR detecta **regiones de texto**, no palabras: una
-> línea entera puede volver como una sola "palabra" del contrato, y a veces dos
-> palabras vecinas vuelven pegadas (`CAFÉINSTANTÁNEO`). Es una diferencia real
-> con Tesseract, que sí segmenta por palabra. El coordinador la absorbe —su
-> parser de etiquetas reconoce la categoría aunque venga pegada— pero conviene
-> tenerla presente al comparar las salidas crudas de los tres motores.
+> **Sobre la granularidad.** PP-OCR detecta **regiones de texto**, no palabras: una línea entera puede volver como una sola "palabra" del contrato, y a veces dos palabras vecinas vuelven pegadas (`CAFÉINSTANTÁNEO`). Es una diferencia real con Tesseract, que sí segmenta por palabra. El coordinador la absorbe —su parser de etiquetas reconoce la categoría aunque venga pegada— pero conviene tenerla presente al comparar las salidas crudas de los tres motores.
 
 **Errores:** `400` formato no soportado, archivo vacío, imagen ilegible o `transform` mal formado · `401` clave compartida inválida · `413` imagen demasiado grande · `503` el paquete `paddleocr` no está instalado · `500` el modelo falló.
 
@@ -116,9 +111,7 @@ Medido con `docker stats` sobre el contenedor en reposo y en proceso:
 
 `MAX_WIDTH` es un **techo de seguridad**, no una preferencia de calidad: la red de detección reescala a múltiplo de 32 y su memoria crece con el cuadrado del lado. Qué resolución conviene para cada documento lo decide el coordinador y lo pide en `transform.max_width`; acá se le impone este techo.
 
-> **Docker Desktop** reparte por defecto ~2 GB entre *todos* los contenedores.
-> Con este servicio y el de EasyOCR arriba a la vez conviene subirlo
-> (Settings → Resources → Memory, recomendado 4 GB) o bajar `MAX_WIDTH`.
+> **Docker Desktop** reparte por defecto ~2 GB entre *todos* los contenedores. Con este servicio y el de EasyOCR arriba a la vez conviene subirlo (Settings → Resources → Memory, recomendado 4 GB) o bajar `MAX_WIDTH`.
 
 ---
 
@@ -154,12 +147,9 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8007
 ```
 
-> **En Windows hay que apagar oneDNN.** Con `paddlepaddle` 3.3.1 los modelos
-> PP-OCRv6 abortan ahí con `ConvertPirAttribute2RuntimeAttribute not support`,
-> que es un fallo del backend de aceleración y no del modelo ni de este
-> servicio. El `.env.example` trae `ENABLE_MKLDNN=true`, que es lo que
-> corresponde dentro del contenedor Linux; para correr directamente sobre
-> Windows hay que ponerlo en `false`. El resultado es el mismo, más lento.
+> **oneDNN va apagado, y no es opcional hoy.** Con `paddlepaddle` 3.3.1 los modelos PP-OCRv6 abortan **al inferir** con `(Unimplemented) ConvertPirAttribute2RuntimeAttribute not support`, un fallo del ejecutor PIR del backend. Se reprodujo en los tres entornos donde se probó: Windows nativo, contenedor Linux y Railway — así que no es específico de una plataforma ni de un CPU. Por eso `ENABLE_MKLDNN=false` es el valor por defecto. Apagado, el motor devuelve exactamente el mismo resultado, más lento.
+
+**Cuidado con el diagnóstico:** el modelo *carga* bien con oneDNN encendido, así que `/engine/readyz` da `ok` y el motor figura `available: true` en el coordinador. El error recién aparece al procesar una imagen, como un `500` del motor que el coordinador propaga como `502`.
 
 ---
 
@@ -175,7 +165,7 @@ uvicorn app.main:app --reload --port 8007
 | `USE_DOC_UNWARPING` | `false` | desdoblado de página (pensado para hojas, no envases) |
 | `USE_TEXTLINE_ORIENTATION` | `false` | orientación de renglón |
 | `DET_BOX_THRESHOLD` | `0.6` | puntaje mínimo para considerar texto una región |
-| `ENABLE_MKLDNN` | `true` | aceleración oneDNN — **apagar en Windows** |
+| `ENABLE_MKLDNN` | `false` | aceleración oneDNN — rompe la inferencia con PaddlePaddle 3.3.1 |
 | `ENGINE_API_KEY` | *(vacía)* | clave compartida con el coordinador |
 | `MAX_UPLOAD_BYTES` | `15728640` | tope del binario recibido |
 
