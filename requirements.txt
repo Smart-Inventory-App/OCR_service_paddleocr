@@ -1,14 +1,9 @@
-fastapi
-uvicorn[standard]
-pydantic-settings
-python-dotenv
-python-multipart               # recepción del binario en /engine/run
-opencv-python-headless         # giro y acotado de la imagen
-numpy
+# Dependencias de ejecución: es lo que instala el Dockerfile.
+#
+# Si agregás algo acá, acordate de que `requirements-base.txt` también se copia
+# en la imagen (ver el `COPY` del Dockerfile).
+
+-r requirements-base.txt
+
 paddlepaddle                   # framework del motor (rueda CPU)
 paddleocr                      # motor
-httpx                          # cliente de pruebas de FastAPI
-pytest
-pytest-asyncio
-pytest-cov
-pillow                         # sólo para generar imágenes en los tests

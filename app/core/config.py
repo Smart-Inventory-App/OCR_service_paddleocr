@@ -50,15 +50,19 @@ class Settings(BaseSettings):
     # los sellos de vencimiento sobre envases brillantes— a costa de más ruido.
     DET_BOX_THRESHOLD: float = 0.6
 
-    # Aceleración oneDNN (MKL-DNN) de PaddlePaddle en CPU. Encendida es la ruta
-    # rápida y es lo que corresponde en el contenedor Linux.
+    # Aceleración oneDNN (MKL-DNN) de PaddlePaddle en CPU.
     #
-    # Hay que apagarla para correr el servicio **directamente sobre Windows**:
-    # con `paddlepaddle` 3.3.1 los modelos PP-OCRv6 abortan ahí con
-    # `ConvertPirAttribute2RuntimeAttribute not support`, que es un fallo del
-    # backend y no de la imagen ni del modelo. Sin oneDNN el motor da el mismo
-    # resultado, más lento. El `.env` de desarrollo la deja apagada por eso.
-    ENABLE_MKLDNN: bool = True
+    # Va **apagada por defecto** porque encendida rompe la inferencia: con
+    # `paddlepaddle` 3.3.1 los modelos PP-OCRv6 abortan con
+    # `(Unimplemented) ConvertPirAttribute2RuntimeAttribute not support`, un
+    # fallo del ejecutor PIR del backend. No es específico de una plataforma: se
+    # reprodujo sobre Windows nativo, dentro del contenedor Linux y en el
+    # despliegue de Railway, que son los tres entornos donde se probó.
+    #
+    # Apagada, el motor devuelve exactamente el mismo resultado, más lento. Se
+    # deja configurable para poder volver a probarla cuando se actualice
+    # PaddlePaddle: si en una versión futura funciona, encenderla es gratis.
+    ENABLE_MKLDNN: bool = False
 
     # Clave compartida con el coordinador. Vacía = sin control de acceso.
     ENGINE_API_KEY: str = ""

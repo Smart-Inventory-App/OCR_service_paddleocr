@@ -10,7 +10,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-COPY requirements.txt .
+# Los dos: `requirements.txt` referencia al base con `-r`, así que sin él el
+# install falla.
+COPY requirements.txt requirements-base.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Los pesos de PP-OCR se descargan una sola vez, en build: así el contenedor

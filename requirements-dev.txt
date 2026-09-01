@@ -1,0 +1,13 @@
+# Dependencias para correr los tests. Es lo que instala el CI.
+#
+# **No incluye el motor**, y es deliberado: los tests doblan el predictor, así
+# que la suite pasa entera sin `paddleocr` ni `paddlepaddle` instalados. Eso baja
+# el CI de ~15 minutos a cerca de uno.
+
+-r requirements-base.txt
+
+pillow                         # genera las imágenes de prueba en memoria
+httpx                          # cliente de pruebas de FastAPI
+pytest
+pytest-asyncio
+pytest-cov

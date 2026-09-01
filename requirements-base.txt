@@ -1,0 +1,13 @@
+# Dependencias comunes al servicio y a sus tests.
+#
+# Están separadas porque el motor pesa: `paddleocr` + `paddlepaddle` son ~1,5 GB
+# que el CI no necesita —los tests doblan el predictor— y que en la imagen de
+# producción no deben convivir con pytest.
+
+fastapi
+uvicorn[standard]
+pydantic-settings
+python-dotenv
+python-multipart               # recepción del binario en /engine/run
+opencv-python-headless         # giro y acotado de la imagen
+numpy
