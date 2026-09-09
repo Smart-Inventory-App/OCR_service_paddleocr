@@ -177,7 +177,9 @@ uvicorn app.main:app --reload --port 8007
 pytest
 ```
 
-**40 tests, 91 % de cobertura.** No construyen el predictor —son segundos y cientos de MB—: se lo dobla. Lo que sí se ejercita es el giro, el acotado de ancho, la reexpansión de las cajas a las coordenadas originales, la conversión del polígono a caja y el agrupamiento por líneas, que es todo lo que este servicio aporta además de invocar al modelo.
+**46 tests, 92 % de cobertura.** No construyen el predictor —son segundos y cientos de MB—: se lo dobla. Lo que sí se ejercita es el giro, el acotado de ancho, la reexpansión de las cajas a las coordenadas originales, la conversión del polígono a caja y el agrupamiento por líneas, que es todo lo que este servicio aporta además de invocar al modelo.
+
+Además, `test_bandas_reales.py` ejercita la detección de bandas de texto sobre **una foto de envase real** —un sello de vencimiento fotografiado a pulso, la única imagen versionada del repositorio, 103 KB a 1400 px— y sin cargar el modelo, así que corre en el CI como cualquier otro test. Es la función que el coordinador usa para aislar el sello, y no se puede probar con un rectángulo dibujado: lo que hay que verificar es que encuentre un renglón entre la iluminación despareja, el envase curvo y el fondo de la mesada. Las afirmaciones son geométricas y no de contenido, porque **cuál** de las bandas es el sello no lo decide este servicio: las ordena y el coordinador prueba las primeras.
 
 | Archivo | Qué cubre |
 |---------|-----------|
