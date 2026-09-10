@@ -6,7 +6,7 @@ mayor complejidad de instalación, dependencia de PaddlePaddle y un consumo de
 recursos "significativamente mayor". Este servicio existe para poder verificar
 esa descripción sobre las fotos reales del proyecto en lugar de darla por buena.
 
-Como los de Tesseract y EasyOCR, este módulo hace una sola cosa: correr el motor
+Como el de Tesseract, este módulo hace una sola cosa: correr el motor
 y devolver las palabras con su caja y su confianza. No interpreta el resultado,
 no extrae campos y no decide reintentos: de eso se ocupa `ocr_service`.
 """
@@ -83,6 +83,9 @@ def load(lang: str | None = None):
                 use_textline_orientation=settings.USE_TEXTLINE_ORIENTATION,
                 text_det_box_thresh=settings.DET_BOX_THRESHOLD,
                 enable_mkldnn=settings.ENABLE_MKLDNN,
+                # Sin tope, cada instancia abre tantos hilos como núcleos ve; con
+                # el motor replicado eso hace que las réplicas se peleen la CPU.
+                **({"cpu_threads": settings.CPU_THREADS} if settings.CPU_THREADS > 0 else {}),
             )
             _predictor_lang = code
             logger.info(

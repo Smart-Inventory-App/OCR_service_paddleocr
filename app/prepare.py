@@ -1,12 +1,12 @@
 """Preparación de la imagen para PaddleOCR.
 
-Es la misma cadena corta que la de `ocr_service_easyocr`, y por el mismo motivo
-medido: PP-OCR hace su propio preprocesamiento (normaliza, reescala a múltiplo
-de 32 y ecualiza dentro de la red) y sus modelos están entrenados sobre imágenes
-en color. La cadena de filtros que hace rendir a Tesseract —grises, inversión,
-CLAHE, binarización— le **quita** información al detector en vez de agregársela.
-Por eso este servicio declara `supports_preprocessing=False` y el coordinador no
-le gasta reintentos variando filtros que va a ignorar.
+Es una cadena corta a propósito, y por un motivo medido: PP-OCR hace su propio 
+preprocesamiento (normaliza, reescala a múltiplo de 32 y ecualiza dentro de la 
+red) y sus modelos están entrenados sobre imágenes en color. La cadena de filtros 
+que hace rendir a Tesseract —grises, inversión, CLAHE, binarización— le **quita** 
+información al detector en vez de agregársela. Por eso este servicio declara 
+`supports_preprocessing=False` y el coordinador no le gasta reintentos variando 
+filtros que va a ignorar.
 
 Lo que sí aplica son las dos operaciones puramente geométricas que el
 coordinador necesita poder pedir: el giro en múltiplos de 90° y el tope de ancho.
