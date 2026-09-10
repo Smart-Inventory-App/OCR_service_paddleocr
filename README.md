@@ -2,7 +2,7 @@
 
 Microservicio que hace **una sola cosa**: correr PaddleOCR sobre una imagen y devolver las palabras reconocidas con su caja y su confianza.
 
-Habla **el mismo contrato** que [`ocr_service_tesseract`](../ocr_service_tesseract) y [`ocr_service_easyocr`](../ocr_service_easyocr): es lo que le permite a [`ocr_service`](../ocr_service) tratar a los tres motores igual, compararlos sobre la misma foto y combinarlos en el modo híbrido.
+Habla **el mismo contrato** que [`ocr_service_tesseract`](../ocr_service_tesseract): es lo que le permite a [`ocr_service`](../ocr_service) tratar a los dos motores igual, compararlos sobre la misma foto, combinarlos en el modo híbrido y **replicar** este sin que nada más se entere.
 
 ```
 ocr_service  ──POST /engine/run──►  este servicio
@@ -19,7 +19,7 @@ La propuesta describe a PaddleOCR como el motor de mayor precisión sobre imáge
 
 Medido sobre las fotos reales del proyecto, esa descripción **se cumple**, y con un margen que cambia la conclusión del módulo: es el único de los tres motores que alcanza por sí solo los dos criterios de aceptación. Los números están en el [README del coordinador](../ocr_service#resultados-medidos---benchmark); el resumen es que lee el sello de vencimiento en las cuatro fotos —incluida la que ningún otro motor levanta— y con confianzas que no obligan a mandar el documento a revisión manual.
 
-Vive en su propio repositorio por la misma razón que EasyOCR: arrastra PaddlePaddle y los pesos de PP-OCR, **2,68 GB de imagen**. Separado, el motor caro se enciende sólo cuando se lo quiere usar o comparar, y si está apagado el coordinador lo reporta como no disponible y el modo híbrido degrada a su motor principal en lugar de fallar.
+Vive en su propio repositorio porque arrastra PaddlePaddle y los pesos de PP-OCR, **2,68 GB de imagen**. Separado, el motor caro se enciende sólo cuando se lo quiere usar o comparar, y si está apagado el coordinador lo reporta como no disponible y el modo híbrido degrada a su motor principal en lugar de fallar.
 
 ---
 
@@ -36,7 +36,7 @@ Vive en su propio repositorio por la misma razón que EasyOCR: arrastra PaddlePa
 | `layout` | string | se acepta por contrato, pero **se ignora** |
 | `transform` | JSON | de la cadena, sólo se aplican `rotate` y el tope de ancho |
 
-**Qué se ignora y por qué.** Es la misma decisión que en EasyOCR y por el mismo motivo: PP-OCR normaliza, reescala a múltiplo de 32 y ecualiza **dentro de la red**, y sus modelos están entrenados sobre imágenes en color. La cadena de filtros que hace rendir a Tesseract —grises, inversión, CLAHE, binarización— le quita información al detector en vez de agregársela. Aplicarla sería empeorar la lectura a pedido. Lo que sí se aplica es lo puramente geométrico: el giro y la resolución, que son decisiones del coordinador sobre el documento, no sobre el motor.
+**Qué se ignora y por qué.** PP-OCR normaliza, reescala a múltiplo de 32 y ecualiza **dentro de la red**, y sus modelos están entrenados sobre imágenes en color. La cadena de filtros que hace rendir a Tesseract —grises, inversión, CLAHE, binarización— le quita información al detector en vez de agregársela. Aplicarla sería empeorar la lectura a pedido. Lo que sí se aplica es lo puramente geométrico: el giro y la resolución, que son decisiones del coordinador sobre el documento, no sobre el motor.
 
 `layout` se ignora porque PP-OCR detecta las regiones de texto con su propia red y no expone nada equivalente al *page segmentation mode* de Tesseract.
 
@@ -62,7 +62,7 @@ Las cajas se devuelven en **coordenadas de la imagen recibida**, no de la imagen
 Dos diferencias de forma con la salida cruda de PP-OCR, resueltas acá para que el coordinador vea lo mismo en los tres motores:
 
 - **El polígono se vuelve caja recta.** PP-OCR devuelve un cuadrilátero de cuatro vértices que puede venir inclinado; el contrato es una caja, así que se toma la envolvente.
-- **Las líneas se numeran.** PP-OCR no numera, así que se agrupan por proximidad vertical, igual que en EasyOCR.
+- **Las líneas se numeran.** PP-OCR no numera, así que se agrupan por proximidad vertical.
 
 > **Sobre la granularidad.** PP-OCR detecta **regiones de texto**, no palabras: una línea entera puede volver como una sola "palabra" del contrato, y a veces dos palabras vecinas vuelven pegadas (`CAFÉINSTANTÁNEO`). Es una diferencia real con Tesseract, que sí segmenta por palabra. El coordinador la absorbe —su parser de etiquetas reconoce la categoría aunque venga pegada— pero conviene tenerla presente al comparar las salidas crudas de los tres motores.
 
@@ -111,7 +111,7 @@ Medido con `docker stats` sobre el contenedor en reposo y en proceso:
 
 `MAX_WIDTH` es un **techo de seguridad**, no una preferencia de calidad: la red de detección reescala a múltiplo de 32 y su memoria crece con el cuadrado del lado. Qué resolución conviene para cada documento lo decide el coordinador y lo pide en `transform.max_width`; acá se le impone este techo.
 
-> **Docker Desktop** reparte por defecto ~2 GB entre *todos* los contenedores. Con este servicio y el de EasyOCR arriba a la vez conviene subirlo (Settings → Resources → Memory, recomendado 4 GB) o bajar `MAX_WIDTH`.
+> Localmente, **Docker Desktop** reparte por defecto ~2 GB entre *todos* los contenedores. Con las dos réplicas de este servicio arriba conviene subirlo (Settings → Resources → Memory, recomendado 4 GB) o bajar `MAX_WIDTH`. Medido con dos réplicas y Tesseract: ~2,0 GB de 4,1.
 
 ---
 
