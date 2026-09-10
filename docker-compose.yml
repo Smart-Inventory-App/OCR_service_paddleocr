@@ -1,19 +1,38 @@
 services:
-
+  # Dos réplicas del mismo motor
   paddleocr:
     build: .
     container_name: tpp_ocr_paddleocr
     ports:
-      # Publicado sólo para poder probar el motor aislado.
       - "8007:8007"
     env_file:
       - .env
+    environment:
+      CPU_THREADS: ${PADDLE_CPU_THREADS:-5}
     networks:
       - tpp-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8007/engine/livez"]
-      # El modelo tarda en cargar: se le da margen antes de contarlo como caído.
+      start_period: 90s
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  paddleocr_2:
+    build: .
+    container_name: tpp_ocr_paddleocr_2
+    ports:
+      - "8017:8007"
+    env_file:
+      - .env
+    environment:
+      CPU_THREADS: ${PADDLE_CPU_THREADS:-5}
+    networks:
+      - tpp-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8007/engine/livez"]
       start_period: 90s
       interval: 30s
       timeout: 5s

@@ -51,7 +51,7 @@ app = FastAPI(
     description=(
         "Ejecuta PaddleOCR sobre una imagen y devuelve las palabras reconocidas "
         "con su caja y su confianza. Mismo contrato que los servicios de "
-        "Tesseract y EasyOCR: la interpretación del resultado es "
+        "Tesseract: la interpretación del resultado es "
         "responsabilidad de `ocr_service`."
     ),
     version="1.0.0",

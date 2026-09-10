@@ -1,7 +1,7 @@
 """Endpoints del servicio de motor.
 
 El contrato tiene que ser exactamente el mismo que el de
-`ocr_service_tesseract` y `ocr_service_easyocr`: es lo que le permite al
+`ocr_service_tesseract`: es lo que le permite al
 coordinador tratar a los tres motores igual.
 """
 

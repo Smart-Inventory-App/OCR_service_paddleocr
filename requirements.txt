@@ -1,8 +1,4 @@
 # Dependencias de ejecución: es lo que instala el Dockerfile.
-#
-# Si agregás algo acá, acordate de que `requirements-base.txt` también se copia
-# en la imagen (ver el `COPY` del Dockerfile).
-
 -r requirements-base.txt
 
 paddlepaddle                   # framework del motor (rueda CPU)

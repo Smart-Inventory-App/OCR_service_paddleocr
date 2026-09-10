@@ -20,6 +20,18 @@ class Settings(BaseSettings):
     # pide en `transform.max_width`; acá sólo se le impone este techo.
     MAX_WIDTH: int = 1600
 
+    # Núcleos que usa la inferencia de esta instancia.
+    #
+    # Importa porque el motor va replicado. Sin tope, PP-OCR abre tantos hilos
+    # como núcleos ve —medido, una sola instancia se clava en ~650 % de CPU— y
+    # dos réplicas sobre la misma máquina piden entre las dos más de lo que hay:
+    # se pelean y el rendimiento total sube mucho menos de lo que debería.
+    #
+    # 0 deja decidir a PaddleOCR, que es lo correcto para una instancia sola.
+    # Con réplicas conviene repartir: `núcleos disponibles / réplicas`, dejando
+    # algo para Tesseract, que también corre en esta máquina.
+    CPU_THREADS: int = 0
+
     # Cargar el modelo al arrancar evita que la primera petición pague la
     # inicialización del predictor. Se puede apagar para que el contenedor
     # levante liviano.
