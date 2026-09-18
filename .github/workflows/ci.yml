@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, production, development]
   pull_request:
-    branches: [main]
+    branches: [main, production, development]
 
 jobs:
   test:
@@ -20,9 +20,6 @@ jobs:
           python-version: '3.11'
           cache: 'pip'
 
-      # `requirements-dev.txt` NO trae `paddleocr` ni `paddlepaddle` (~1,5 GB):
-      # los tests doblan el predictor, así que la suite pasa entera sin el motor
-      # instalado. Es lo que baja el CI de ~15 minutos a cerca de uno.
       - name: Install dependencies
         run: pip install -r requirements-dev.txt
 
