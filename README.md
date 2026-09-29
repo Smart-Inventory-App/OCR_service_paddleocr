@@ -1,4 +1,6 @@
-# Motor OCR — PaddleOCR
+# Motor OCR: PaddleOCR — Smart Inventory Platform
+
+[![codecov](https://codecov.io/gh/Smart-Inventory-App/OCR_service_paddleocr/graph/badge.svg?token=tqQKjGthx2)](https://codecov.io/gh/Smart-Inventory-App/OCR_service_paddleocr)
 
 Microservicio que hace **una sola cosa**: correr PaddleOCR sobre una imagen y devolver las palabras reconocidas con su caja y su confianza.
 
